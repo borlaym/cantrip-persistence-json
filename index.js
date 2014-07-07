@@ -2,7 +2,7 @@ var fs = require("fs");
 _ = require("lodash");
 
 module.exports = {
-	setupPersistence: function() {
+	setupPersistence: function(callback) {
 		//Set up memory by reading the contents of the file
 		if (!fs.existsSync("data/" + this.options.namespace + ".json")) {
 			fs.writeFileSync("data/" + this.options.namespace + ".json", "{}");
@@ -13,6 +13,8 @@ module.exports = {
 		});
 
 		this.data = JSON.parse(this.data);
+
+		callback();
 	},
 	dataStore: {
 		get: function(path, callback) {

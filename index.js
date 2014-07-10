@@ -22,7 +22,7 @@ module.exports = {
 	},
 	syncData: function(req, res, next) {
 		if (++counter === options.saveEvery && options.saveEvery !== 0) {
-			fs.writeFile("data/" + options.namespace, JSON.stringify(req.data), function(err) {
+			fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(req.data), function(err) {
 				if (err) {
 					console.log(err);
 				}

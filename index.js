@@ -65,15 +65,20 @@ module.exports = {
 			callback(null, node);
 		},
 		set: function(path, data, callback) {
+			var self = this;
 			this.get(path, function(err, target) {
 				if (_.isArray(target)) {
 					target.push(data);
+					callback();
 				} else if (_.isObject(target)) {
 					target = _.extend(target, data);
+					callback();
 				} else {
-					target = data;
+					self.parent(path, function(err, parent) {
+						parent[_.last(path.split("/"))] = data;
+						callback();
+					});
 				}
-				callback();
 			});
 		},
 		delete: function(path, callback) {

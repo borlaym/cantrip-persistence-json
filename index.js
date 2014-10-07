@@ -2,7 +2,20 @@ var fs = require("fs");
 _ = require("lodash");
 
 var counter = 0;
-var options = null
+var options = {};
+var data = {};
+function syncData(data) {
+	console.log("Syncing...");
+	if (++counter === options.saveEvery && options.saveEvery !== 0) {
+		fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+			if (err) {
+				console.log(err);
+			}
+		});
+		counter = 0;
+	}
+}
+
 
 module.exports = {
 	setupPersistence: function(callback) {
@@ -18,18 +31,9 @@ module.exports = {
 
 		this.data = JSON.parse(this.data);
 
-		callback();
-	},
-	syncData: function(req, res, next) {
-		if (++counter === options.saveEvery && options.saveEvery !== 0) {
-			fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(req.data), function(err) {
-				if (err) {
-					console.log(err);
-				}
-			});
-			counter = 0;
-		}
+		data = this.data;
 
+		callback();
 	},
 	dataStore: {
 		get: function(path, callback) {
@@ -70,13 +74,16 @@ module.exports = {
 				if (_.isArray(target)) {
 					target.push(data);
 					callback();
+					syncData();
 				} else if (_.isObject(target)) {
 					target = _.extend(target, data);
 					callback();
+					syncData();
 				} else {
 					self.parent(path, function(err, parent) {
 						parent[_.last(path.split("/"))] = data;
 						callback();
+						syncData();
 					});
 				}
 			});
@@ -98,6 +105,7 @@ module.exports = {
 					delete parent[index];
 				}
 				callback();
+				syncData();
 			});
 		},
 		parent: function(path, callback) {

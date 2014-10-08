@@ -5,7 +5,6 @@ var counter = 0;
 var options = {};
 var data = {};
 function syncData(data) {
-	console.log("Syncing...");
 	if (++counter === options.saveEvery && options.saveEvery !== 0) {
 		fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
 			if (err) {
@@ -66,7 +65,11 @@ module.exports = {
 				}
 			}
 
-			callback(null, node);
+			//Call the callback to be compatible with the async pattern of the dataStore
+			callback && callback(null, node);
+
+			//But we return the value too, since the JSON implementation is syncronous
+			return node;
 		},
 		set: function(path, data, callback) {
 			var self = this;

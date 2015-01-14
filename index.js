@@ -7,13 +7,15 @@ _ = require("lodash");
  * @private
  */
 var data = {};
-function syncData(data) {
-	fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+
+var options;
+
+function syncData() {
+	fs.writeFile(options.namespace, JSON.stringify(data, null, "\t"), function(err) {
 		if (err) {
 			console.log(err);
 		}
 	});
-	counter = 0;
 }
 
 
@@ -27,6 +29,8 @@ module.exports = {
 		data = JSON.parse(fs.readFileSync(this.options.namespace, {
 			encoding: 'utf-8'
 		}));
+
+		options = this.options;
 
 		callback && callback();
 	},

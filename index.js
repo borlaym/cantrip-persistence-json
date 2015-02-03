@@ -6,7 +6,7 @@ var options = {};
 var data = {};
 function syncData(data) {
 	if (++counter === options.saveEvery && options.saveEvery !== 0) {
-		fs.writeFile("data/" + options.namespace + ".json", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+		fs.writeFile( options.namespace, JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
 			if (err) {
 				console.log(err);
 			}
@@ -20,11 +20,11 @@ module.exports = {
 	setupPersistence: function(callback) {
 		options = this.options;
 		//Set up memory by reading the contents of the file
-		if (!fs.existsSync("data/" + this.options.namespace + ".json")) {
-			fs.writeFileSync("data/" + this.options.namespace + ".json", "{\"_contents\": {}}");
+		if (!fs.existsSync(this.options.namespace)) {
+			fs.writeFileSync(this.options.namespace, "{\"_contents\": {}}");
 		}
 
-		this.data = fs.readFileSync("data/" + this.options.namespace + ".json", {
+		this.data = fs.readFileSync( this.options.namespace, {
 			encoding: 'utf-8'
 		});
 

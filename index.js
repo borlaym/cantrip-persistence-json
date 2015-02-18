@@ -62,17 +62,33 @@ module.exports =  function(options) {
 
 				return callback && typeof callback === 'function' && callback(null, node);
 			},
-			set: function(path, data, callback) {
+			set: function(path, data, patch, callback) {
 				var self = this;
 				this.get(path, function(err, target) {
 					if (_.isArray(target)) {
+						//POST
 						target.push(data);
 						callback && typeof callback === 'function' && callback(null);
 						syncData();
 					} else if (_.isObject(target)) {
-						target = _.extend(target, data);
-						callback && typeof callback === 'function' && callback(null);
-						syncData();
+						//PATCH
+						if (patch) {
+							target = _.merge(target, data);
+							callback && typeof callback === 'function' && callback(null);
+							syncData();
+						} else {
+							//PUT
+							self.parent(path, function(err, parent) {
+								var toPut = _.last(path.split("/"));
+								if (toPut === "") {
+									_data = data;
+								} else {
+									parent[toPut] = data;
+								}
+								callback && typeof callback === 'function' && callback(null);
+								syncData();
+							});
+						}
 					} else {
 						self.parent(path, function(err, parent) {
 							parent[_.last(path.split("/"))] = data;

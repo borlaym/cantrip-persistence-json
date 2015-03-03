@@ -16,20 +16,20 @@ function syncData(data) {
 		}
 	});
 	if (++counter === options.saveEvery && options.saveEvery !== 0) {
-		mkdirp("./backup", function(err) {
+		mkdirp(options.backupFolder || "./backup", function(err) {
 			if (err) {
 				return console.log(err);
 			}
-			fs.writeFile("./backup/" + (new Date().getTime()) + ".bak", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+			fs.writeFile((options.backupFolder || "./backup") + "/" + (new Date().getTime()) + ".bak", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
 				err && console.log(err);
 				counter = 0;
-				fs.readdir("./backup", function(err, data) {
+				fs.readdir(options.backupFolder || "./backup", function(err, data) {
 					err && console.log(err);
-					if (data.length > 10) {
+					if (data.length > (options.backupFiles || 10) ) {
 						data = _.sortBy(data, function(name) {
 							return parseInt(name);
 						});
-						fs.unlink("./backup/" + data[0], function(err) {
+						fs.unlink((options.backupFolder || "./backup") + "/" + data[0], function(err) {
 							err && console.log(err);
 						});
 					}

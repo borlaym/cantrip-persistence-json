@@ -1,17 +1,41 @@
 var fs = require("fs");
-_ = require("lodash");
+var _ = require("lodash");
+var mkdirp = require("mkdirp");
+
 
 var counter = 0;
 var options = {};
 var data = {};
+/**
+ * Saves the current data object to the specified json file on every non-get request. Also makes a backup file on every x requests.
+ */
 function syncData(data) {
+	fs.writeFile( options.namespace, JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+		if (err) {
+			console.log(err);
+		}
+	});
 	if (++counter === options.saveEvery && options.saveEvery !== 0) {
-		fs.writeFile( options.namespace, JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+		mkdirp("./backup", function(err) {
 			if (err) {
-				console.log(err);
+				return console.log(err);
 			}
+			fs.writeFile("./backup/" + (new Date().getTime()) + ".bak", JSON.stringify(options.persistence.dataStore.data, null, "\t"), function(err) {
+				err && console.log(err);
+				counter = 0;
+				fs.readdir("./backup", function(err, data) {
+					err && console.log(err);
+					if (data.length > 10) {
+						data = _.sortBy(data, function(name) {
+							return parseInt(name);
+						});
+						fs.unlink("./backup/" + data[0], function(err) {
+							err && console.log(err);
+						});
+					}
+				});
+			});
 		});
-		counter = 0;
 	}
 }
 
